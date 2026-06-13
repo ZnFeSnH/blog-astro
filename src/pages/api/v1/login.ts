@@ -1,4 +1,4 @@
-export const prerender = false; // 👈 极其关键！强制声明为动态 SSR 接口，阻止 Cloudflare 把它当静态文件
+export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
@@ -24,23 +24,24 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
       }), { status: 503, headers: { 'Content-Type': 'application/json' } });
     }
 
+    // 1. 从数据库查找用户
     const user = await db.query.users.findFirst({
       where: eq(users.email, validated.email)
     });
 
-    const isDemoValid = validated.email === 'admin@yourblog.com' && validated.password === 'ChangeMe123!Secure';
-    
-    if (!user && !isDemoValid) {
+    // 2. 真实的密码校验（堵死之前的 isDemoValid 后门！）
+    if (!user || user.passwordHash !== validated.password) {
       return new Response(JSON.stringify({
         success: false,
         error: { code: 'ERR_INVALID_CREDENTIALS', message: 'Invalid email or password', traceId }
       }), { status: 401, headers: { 'Content-Type': 'application/json' } });
     }
 
+    // 3. 验证通过，签发 Token
     const authUser = {
-      id: user?.id.toString() || '1',
-      email: validated.email,
-      role: (user?.role || 'admin') as 'admin' | 'editor'
+      id: user.id.toString(),
+      email: user.email,
+      role: user.role as 'admin' | 'editor'
     };
 
     const token = await authService.signToken({
@@ -89,7 +90,6 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
   }
 };
 
-// 👇 新增：处理 CORS 预检请求，防止浏览器拦截
 export const OPTIONS: APIRoute = async () => {
   return new Response(null, {
     status: 204,
