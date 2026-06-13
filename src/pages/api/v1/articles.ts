@@ -1,3 +1,6 @@
+export const prerender = false;
+
+
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { articleCreateSchema, articleUpdateSchema } from '../../../lib/validation';

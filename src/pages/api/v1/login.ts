@@ -1,3 +1,5 @@
+export const prerender = false; // 👈 极其关键！强制声明为动态 SSR 接口，阻止 Cloudflare 把它当静态文件
+
 import type { APIRoute } from 'astro';
 import { z } from 'zod';
 import { loginSchema } from '../../../lib/validation';
@@ -12,7 +14,6 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     const body = await request.json();
     const validated = loginSchema.parse(body);
     
-    // 👉 修复点：必须从 runtime.env 中获取绑定
     const d1Binding = locals.runtime?.env?.DB;
     const db = d1Binding ? createDbClient(d1Binding) : null;
     
@@ -86,4 +87,16 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
       error: { code: 'ERR_INTERNAL', message: 'Login failed', traceId }
     }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
+};
+
+// 👇 新增：处理 CORS 预检请求，防止浏览器拦截
+export const OPTIONS: APIRoute = async () => {
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 };
