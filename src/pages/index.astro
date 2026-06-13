@@ -1,32 +1,47 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+// 这里可以改成以后从 API 动态拉取，目前先用演示数据
+const samplePosts = [
+  {
+    title: "边缘计算博客系统架构解析",
+    slug: "edge-cms-architecture",
+    excerpt: "如何在 Cloudflare Workers + D1 上构建安全、高性能的现代 CMS。",
+    date: "2025-06-10"
+  },
+  {
+    title: "Astro 混合渲染与安全边界设计",
+    slug: "astro-hybrid-security",
+    excerpt: "静态页面天然免疫注入，动态 API 必须纵深防御。",
+    date: "2025-06-08"
+  }
+];
 ---
 
 <BaseLayout>
-  <div class="min-h-screen flex flex-col items-center justify-center bg-zinc-950 text-center px-6">
-    <div class="max-w-2xl">
-      <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/5 text-xs tracking-[3px] mb-6 border border-white/10">
-        EDGE SECURE • POWERED BY CLOUDFLARE
-      </div>
-      
-      <h1 class="text-7xl font-bold tracking-[-4.5px] leading-none">Astro Edge CMS</h1>
-      <p class="mt-6 text-2xl text-zinc-400 tracking-tight">现代 · 安全 · 边缘优先的博客系统</p>
-      
-      <div class="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
-        <a href="/blog" 
-           class="px-10 py-4 rounded-2xl bg-white text-zinc-950 font-semibold text-lg hover:bg-zinc-200 active:scale-[0.985] transition-all">
-          浏览博客
+  <div class="max-w-4xl mx-auto px-6 py-16">
+    <h1 class="text-6xl font-bold tracking-[-3px] mb-4">我的博客</h1>
+    <p class="text-xl text-zinc-400 mb-12">纯静态生成 · 极速加载 · 边缘安全</p>
+
+    <div class="space-y-8">
+      {samplePosts.map(post => (
+        <a href={`/blog/${post.slug}`} class="block group">
+          <article class="glass p-8 rounded-3xl border border-white/10 hover:border-white/30 transition-all">
+            <div class="flex justify-between items-baseline">
+              <h2 class="text-3xl font-semibold tracking-tight group-hover:text-blue-400 transition-colors">{post.title}</h2>
+              <time class="text-xs text-zinc-500 tabular-nums">{post.date}</time>
+            </div>
+            <p class="mt-4 text-lg text-zinc-300 leading-relaxed">{post.excerpt}</p>
+            <div class="mt-6 text-sm text-blue-400 flex items-center gap-1">
+              阅读全文 <span class="group-hover:translate-x-0.5 transition">→</span>
+            </div>
+          </article>
         </a>
-        <a href="/admin" 
-           class="px-10 py-4 rounded-2xl border border-white/30 hover:bg-white/5 font-semibold text-lg transition-all">
-          进入管理后台
-        </a>
-      </div>
-      
-      <div class="mt-16 text-xs text-zinc-500 max-w-md mx-auto">
-        静态生成 · D1 边缘数据库 · JWT + Zod + Rate Limit 多层防御<br>
-        生产就绪 · 可零停机升级
-      </div>
+      ))}
+    </div>
+
+    <div class="mt-16 text-center text-xs text-zinc-500">
+      文章内容由 D1 存储 · 通过 Drizzle ORM 类型安全访问 · 管理后台受多层安全保护
     </div>
   </div>
 </BaseLayout>
