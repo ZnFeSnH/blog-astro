@@ -6,7 +6,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname, method } = context.url;
   const isApi = pathname.startsWith('/api/');
   const isAdmin = pathname.startsWith('/admin');
-  const isProtectedApi = isApi && !pathname.startsWith('/api/public/') && !pathname.startsWith('/api/login');
+  const isProtectedApi = isApi && !pathname.startsWith('/api/public/') && !pathname.startsWith('/api/v1/login');
   const isProtected = isProtectedApi || isAdmin;
 
   const traceId = crypto.randomUUID();
