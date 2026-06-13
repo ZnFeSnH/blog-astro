@@ -16,7 +16,9 @@ function jsonError(code: string, message: string, traceId: string, status = 500,
 
 export const GET: APIRoute = async ({ url, locals }) => {
   const traceId = locals.traceId || crypto.randomUUID();
-  const db = locals.DB ? createDbClient(locals.DB) : null;
+  // 👉 修复点：必须从 runtime.env 中获取绑定
+  const d1Binding = locals.runtime?.env?.DB;
+  const db = d1Binding ? createDbClient(d1Binding) : null;
   
   if (!db) {
     return jsonError('ERR_INTERNAL', 'DB unavailable', traceId, 503);
@@ -53,7 +55,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return jsonError('ERR_UNAUTHORIZED', 'Auth required', traceId, 401);
   }
 
-  const db = locals.DB ? createDbClient(locals.DB) : null;
+  // 👉 修复点
+  const d1Binding = locals.runtime?.env?.DB;
+  const db = d1Binding ? createDbClient(d1Binding) : null;
   if (!db) return jsonError('ERR_INTERNAL', 'DB unavailable', traceId, 503);
 
   try {
@@ -89,7 +93,9 @@ export const PUT: APIRoute = async ({ request, locals, url }) => {
   const traceId = locals.traceId || crypto.randomUUID();
   if (!locals.user) return jsonError('ERR_UNAUTHORIZED', '', traceId, 401);
 
-  const db = locals.DB ? createDbClient(locals.DB) : null;
+  // 👉 修复点
+  const d1Binding = locals.runtime?.env?.DB;
+  const db = d1Binding ? createDbClient(d1Binding) : null;
   if (!db) return jsonError('ERR_INTERNAL', '', traceId, 503);
 
   try {
@@ -125,7 +131,9 @@ export const DELETE: APIRoute = async ({ locals, url }) => {
   const id = parseInt(url.searchParams.get('id') || '0');
   if (!id) return jsonError('ERR_VALIDATION', 'ID required', traceId, 400);
 
-  const db = locals.DB ? createDbClient(locals.DB) : null;
+  // 👉 修复点
+  const d1Binding = locals.runtime?.env?.DB;
+  const db = d1Binding ? createDbClient(d1Binding) : null;
   if (!db) return jsonError('ERR_INTERNAL', '', traceId, 503);
 
   await db.update(articles)

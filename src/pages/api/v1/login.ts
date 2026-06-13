@@ -12,7 +12,9 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
     const body = await request.json();
     const validated = loginSchema.parse(body);
     
-    const db = locals.DB ? createDbClient(locals.DB) : null;
+    // 👉 修复点：必须从 runtime.env 中获取绑定
+    const d1Binding = locals.runtime?.env?.DB;
+    const db = d1Binding ? createDbClient(d1Binding) : null;
     
     if (!db) {
       return new Response(JSON.stringify({
@@ -78,7 +80,7 @@ export const POST: APIRoute = async ({ request, locals, cookies }) => {
       }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
     
-    console.error('Login error', { traceId });
+    console.error('Login error', { traceId, error });
     return new Response(JSON.stringify({
       success: false,
       error: { code: 'ERR_INTERNAL', message: 'Login failed', traceId }

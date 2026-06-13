@@ -16,7 +16,9 @@ export const onRequest = defineMiddleware(async (context, next) => {
     const clientIp = context.request.headers.get('cf-connecting-ip') || 
                      context.request.headers.get('x-forwarded-for') || 'unknown';
     
-    const limiter = createRateLimiter(context.locals.RATE_LIMIT_KV);
+    // 👉 修复点：从 runtime.env 获取 KV
+    const kvBinding = context.locals.runtime?.env?.RATE_LIMIT_KV;
+    const limiter = createRateLimiter(kvBinding);
     const allowed = await limiter.checkLimit(
       `ip:${clientIp}:${pathname}`,
       30,
