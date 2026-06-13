@@ -58,6 +58,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.isAdmin = user.role === 'admin';
   }
 
+/*
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method) && (isApi || isAdmin)) {
     const origin = context.request.headers.get('origin');
     const referer = context.request.headers.get('referer');
@@ -76,6 +77,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       );
     }
   }
+*/
 
   const response = await next();
 
