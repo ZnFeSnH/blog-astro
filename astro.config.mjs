@@ -9,9 +9,7 @@ export default defineConfig({
     mode: 'directory'
   }),
   integrations: [
-    vue({
-      appEntrypoint: '/src/pages/admin/admin-app.ts'
-    }),
+    vue(),
     tailwind()
   ],
   security: {
