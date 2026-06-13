@@ -1,0 +1,195 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const user = Astro.locals.user;
+---
+
+<BaseLayout>
+  <div class="min-h-screen bg-zinc-950">
+    <nav class="border-b border-white/10 bg-zinc-900/80 backdrop-blur-xl sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-8 py-5 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-9 h-9 bg-white rounded-xl flex items-center justify-center">
+            <span class="text-zinc-950 font-black text-xl tracking-[-2px]">AE</span>
+          </div>
+          <div>
+            <div class="font-semibold tracking-tight">Astro Edge CMS</div>
+            <div class="text-[10px] text-emerald-400 -mt-0.5">EDGE SECURE • v1</div>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-4 text-sm">
+          <div class="px-4 py-1.5 bg-white/5 rounded-full flex items-center gap-2">
+            <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+            <span class="text-emerald-400">已认证</span>
+          </div>
+          <div class="text-zinc-400">{user?.email}</div>
+          <button 
+            id="logout-btn"
+            class="px-5 py-2 text-sm border border-white/20 hover:bg-white/5 rounded-xl transition-colors"
+          >
+            安全登出
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-8 py-10">
+      <div class="flex items-end justify-between mb-8">
+        <div>
+          <h1 class="text-5xl font-bold tracking-[-2.5px]">内容管理</h1>
+          <p class="text-zinc-400 mt-1">所有操作已通过 Zod 校验、JWT 鉴权与速率限制保护</p>
+        </div>
+        <button 
+          onclick="showCreateModal()"
+          class="px-6 py-3 bg-white text-zinc-950 font-semibold rounded-2xl flex items-center gap-2 active:scale-[0.985] transition-all"
+        >
+          <span>＋</span> 新建文章
+        </button>
+      </div>
+
+      <div class="glass rounded-3xl overflow-hidden border border-white/10">
+        <table class="w-full">
+          <thead class="bg-white/5 text-xs uppercase tracking-widest text-zinc-400">
+            <tr>
+              <th class="text-left px-8 py-4 font-medium">标题 / Slug</th>
+              <th class="text-left px-6 py-4 font-medium">状态</th>
+              <th class="text-left px-6 py-4 font-medium">创建时间</th>
+              <th class="text-right px-8 py-4 font-medium w-40">操作</th>
+            </tr>
+          </thead>
+          <tbody id="articles-tbody" class="divide-y divide-white/10 text-sm">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="create-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[100]">
+    <div class="glass w-full max-w-2xl mx-4 rounded-3xl p-8 border border-white/10">
+      <h2 class="text-2xl font-semibold tracking-tight mb-6">创建新文章</h2>
+      
+      <form id="create-form" class="space-y-5">
+        <div>
+          <label class="text-xs tracking-widest text-zinc-400">标题</label>
+          <input name="title" required class="mt-1.5 w-full bg-zinc-900 border border-white/20 px-4 py-3 rounded-2xl" placeholder="文章标题">
+        </div>
+        <div class="grid grid-cols-2 gap-5">
+          <div>
+            <label class="text-xs tracking-widest text-zinc-400">Slug (URL 友好)</label>
+            <input name="slug" required pattern="[a-z0-9-]+" class="mt-1.5 w-full bg-zinc-900 border border-white/20 px-4 py-3 rounded-2xl" placeholder="my-awesome-post">
+          </div>
+          <div>
+            <label class="text-xs tracking-widest text-zinc-400">状态</label>
+            <select name="status" class="mt-1.5 w-full bg-zinc-900 border border-white/20 px-4 py-3 rounded-2xl">
+              <option value="draft">草稿</option>
+              <option value="published">发布</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label class="text-xs tracking-widest text-zinc-400">正文内容 (Markdown 兼容)</label>
+          <textarea name="content" required rows="8" class="mt-1.5 w-full bg-zinc-900 border border-white/20 px-4 py-3 rounded-2xl font-mono text-sm" placeholder="开始写作..."></textarea>
+        </div>
+        
+        <div class="flex gap-3 pt-4">
+          <button type="button" onclick="hideCreateModal()" class="flex-1 py-3 border border-white/20 rounded-2xl">取消</button>
+          <button type="submit" class="flex-1 py-3 bg-white text-zinc-950 font-semibold rounded-2xl">创建文章</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const tbody = document.getElementById('articles-tbody');
+  const modal = document.getElementById('create-modal');
+  const form = document.getElementById('create-form');
+
+  async function loadArticles() {
+    try {
+      const res = await fetch('/api/v1/articles?status=all', { credentials: 'include' });
+      const json = await res.json();
+      
+      if (!json.success) throw new Error(json.error?.message);
+      
+      tbody.innerHTML = '';
+      
+      json.data.forEach(article => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/5 transition-colors';
+        row.innerHTML = `
+          <td class="px-8 py-5">
+            <div class="font-medium">${article.title}</div>
+            <div class="text-xs text-zinc-500 font-mono mt-0.5">${article.slug}</div>
+          </td>
+          <td class="px-6 py-5">
+            <span class="inline-block px-3 py-px text-[10px] rounded-full ${article.status === 'published' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-amber-400/10 text-amber-400'}">
+              ${article.status}
+            </span>
+          </td>
+          <td class="px-6 py-5 text-zinc-400 text-xs">${new Date(article.createdAt).toLocaleDateString('zh-CN')}</td>
+          <td class="px-8 py-5 text-right">
+            <button onclick="deleteArticle(${article.id})" class="text-red-400 hover:text-red-300 text-xs px-4 py-1">删除</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="4" class="px-8 py-12 text-center text-red-400">加载失败: ${e.message}</td></tr>`;
+    }
+  }
+
+  window.showCreateModal = () => modal.classList.remove('hidden');
+  window.hideCreateModal = () => modal.classList.add('hidden');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    
+    const payload = {
+      title: fd.get('title'),
+      slug: fd.get('slug'),
+      content: fd.get('content'),
+      status: fd.get('status')
+    };
+
+    const res = await fetch('/api/v1/articles', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      credentials: 'include'
+    });
+    
+    const result = await res.json();
+    if (result.success) {
+      hideCreateModal();
+      form.reset();
+      loadArticles();
+    } else {
+      alert('创建失败: ' + (result.error?.message || '未知错误'));
+    }
+  });
+
+  window.deleteArticle = async (id) => {
+    if (!confirm('确认软删除这篇文章？')) return;
+    
+    const res = await fetch(`/api/v1/articles?id=${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    });
+    
+    if (res.ok) {
+      loadArticles();
+    } else {
+      alert('删除失败');
+    }
+  };
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/v1/logout', { method: 'POST', credentials: 'include' });
+    window.location.href = '/login';
+  });
+
+  loadArticles();
+</script>

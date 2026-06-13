@@ -1,0 +1,25 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout>
+  <article class="max-w-3xl mx-auto px-6 py-16 prose prose-invert prose-lg">
+    <h1 class="text-5xl font-bold tracking-[-2px]">边缘计算博客系统架构解析</h1>
+    <p class="text-zinc-400">2025-06-10 • 8 min read</p>
+    
+    <div class="mt-10 text-[15px] leading-relaxed text-zinc-300 space-y-6">
+      <p>本系统采用 Astro 混合渲染 + Cloudflare D1 + Vue 管理后台的边缘优先架构。</p>
+      
+      <h3 class="font-semibold text-white">核心安全分层</h3>
+      <ul class="list-disc pl-6 space-y-2">
+        <li>Cloudflare 网络层：DDoS 防护 + WAF</li>
+        <li>Astro 中间件：JWT 鉴权 + Origin 校验 + Rate Limit</li>
+        <li>Zod：严格输入白名单校验</li>
+        <li>Drizzle ORM：参数化查询，彻底杜绝 SQL 注入</li>
+        <li>D1：边缘 SQLite，数据主权与低延迟</li>
+      </ul>
+
+      <p>所有 API 均版本化 (/api/v1/)，支持平滑升级与 feature flag 热切换。</p>
+    </div>
+  </article>
+</BaseLayout>

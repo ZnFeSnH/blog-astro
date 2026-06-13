@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const samplePosts = [
+  {
+    title: "边缘计算博客系统架构解析",
+    slug: "edge-cms-architecture",
+    excerpt: "如何在 Cloudflare Workers + D1 上构建安全、高性能的现代 CMS。",
+    date: "2025-06-10"
+  },
+  {
+    title: "Astro 混合渲染与安全边界设计",
+    slug: "astro-hybrid-security",
+    excerpt: "静态页面天然免疫注入，动态 API 必须纵深防御。",
+    date: "2025-06-08"
+  }
+];
+---
+
+<BaseLayout>
+  <div class="max-w-4xl mx-auto px-6 py-16">
+    <h1 class="text-6xl font-bold tracking-[-3px] mb-4">博客</h1>
+    <p class="text-xl text-zinc-400 mb-12">纯静态生成 · 极速加载 · SEO 友好</p>
+
+    <div class="space-y-8">
+      {samplePosts.map(post => (
+        <a href={`/blog/${post.slug}`} class="block group">
+          <article class="glass p-8 rounded-3xl border border-white/10 hover:border-white/30 transition-all">
+            <div class="flex justify-between items-baseline">
+              <h2 class="text-3xl font-semibold tracking-tight group-hover:text-blue-400 transition-colors">{post.title}</h2>
+              <time class="text-xs text-zinc-500 tabular-nums">{post.date}</time>
+            </div>
+            <p class="mt-4 text-lg text-zinc-300 leading-relaxed">{post.excerpt}</p>
+            <div class="mt-6 text-sm text-blue-400 flex items-center gap-1">
+              阅读全文 <span class="group-hover:translate-x-0.5 transition">→</span>
+            </div>
+          </article>
+        </a>
+      ))}
+    </div>
+
+    <div class="mt-16 text-center text-xs text-zinc-500">
+      文章内容由 D1 存储 · 通过 Drizzle ORM 类型安全访问 · 管理后台受多层安全保护
+    </div>
+  </div>
+</BaseLayout>

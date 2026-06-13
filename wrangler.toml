@@ -1,0 +1,20 @@
+name = "astro-edge-cms"
+compatibility_date = "2025-06-01"
+compatibility_flags = ["nodejs_compat"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "astro-edge-cms-db"
+database_id = "your-d1-database-id-here"
+
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "your-kv-namespace-id-here"
+
+[vars]
+PUBLIC_SITE_URL = "https://yourblog.com"
+API_VERSION = "v1"
+FEATURE_FLAGS_ENABLED = true
+
+[env.production]
+compatibility_date = "2025-06-01"
